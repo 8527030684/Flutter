@@ -87,7 +87,7 @@ const Bestsellers = () => {
             <Slider {...settings2}>
               {
                 productInfo?.map((item) => (
-              <Link to="/product-detail" className="slider-item" key={item._id}>
+              <Link to={`/product-detail/${item?._id}`} className="slider-item" key={item._id}>
                 <div className="slider-item-pic">
                   <Image src={item.productImage} alt="Seller icon" />
                   <span className="discount">{item.discountPrice}%</span>
