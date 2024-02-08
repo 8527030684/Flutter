@@ -12,11 +12,8 @@ const Header = () => {
   const [category, setCategory] = useState(null);
 
   useEffect(() => {
-    // Call the fetchData function
     fetchCategories();
   }, []);
-  // console.log("data ", category);
-
   const fetchCategories = async () => {
     try {
       const result = await fetchData("/categories?isPaginate=false");
