@@ -3,6 +3,7 @@ import { Nav } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { getItemsSelector } from "../../redux/slices/cartSlice";
 import { fetchData } from "../../apis/api";
+import { Link } from "react-router-dom";
 
 
 const Header = () => {
@@ -11,11 +12,8 @@ const Header = () => {
   const [category, setCategory] = useState(null);
 
   useEffect(() => {
-    // Call the fetchData function
     fetchCategories();
   }, []);
-  // console.log("data ", category);
-
   const fetchCategories = async () => {
     try {
       const result = await fetchData("/categories?isPaginate=false");
@@ -38,7 +36,9 @@ const Header = () => {
           {
             category?.map((cat) => (
               <Nav.Item key={cat?._id} className={cat.status === "active" ? "active" : ""}>
-                <Nav.Link href="/home">{cat.name}</Nav.Link>
+                <Nav.Link>
+                  <Link to="/">{cat.name}</Link>
+                </Nav.Link>
               </Nav.Item>
             ))
           }

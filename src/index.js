@@ -55,7 +55,7 @@ root.render(
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/product-detail" element={<ProductDetail />} />
+            <Route path="/product-detail/:id" element={<ProductDetail />} />
             <Route element={<Dashboard />}>
               <Route path="/category" element={<Category />} />
               <Route path="/sub-category" element={<SubCategory />} />

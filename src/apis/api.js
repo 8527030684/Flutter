@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'http://localhost:3001';
+const baseURL = 'http://64.227.131.178:3001';
 
 export const fetchData = async (endpoint) => {
   try {
