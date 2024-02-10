@@ -3,7 +3,7 @@ import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 
 const CropperImage = ({previewImage, croppedImage}) => {
-    console.log('previewImage-->', previewImage);
+    // console.log('previewImage-->', previewImage);
     const cropperRef = useRef(null);
     const [image, setImage] = useState("");
 

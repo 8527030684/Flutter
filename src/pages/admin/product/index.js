@@ -90,6 +90,8 @@ const Product = () => {
         reader.onload = () => {
         setPreviewImage(reader.result);
         };
+        setIsLoading(false);
+        setIsLoad(false);
         reader.readAsDataURL(e.target.files[0]);
         console.log("previewImage ", previewImage);
     }

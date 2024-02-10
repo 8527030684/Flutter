@@ -75,16 +75,20 @@ const Category = () => {
     // for uploading image
     const UploadImage = (e) => {
         setIsLoading(true);
+        console.log('aaaaaa');
+        console.log('isLoading11', isLoading);
         const reader = new FileReader();
         reader.onload = () => {
         setPreviewImage(reader.result);
         };
+        setIsLoading(false);
+        console.log('isLoading22', isLoading);
         reader.readAsDataURL(e.target.files[0]);
-        console.log("previewImage ", previewImage);
+        // console.log("previewImage ", previewImage);
     }
 
     const croppedImage = (image) => {
-        console.log('----', image);
+        // console.log('----', image);
         const formDataFile = new FormData();
         formDataFile.append("file", image);
         postData("/fileUpload", formDataFile)
@@ -94,19 +98,19 @@ const Category = () => {
             setIsLoading(false);
         })
         .catch((error) => {
-            console.error("Uploading images into api");
+            // console.error("Uploading images into api");
             setIsLoading(false);
         });
     }
 
     const handlePostData = (e) => {
         e.preventDefault();
-        console.log("subcategory data ", formData.id);
+        // console.log("subcategory data ", formData.id);
         const routeName = !isEdit ? '/categories' : `/categories/${formData.id}`;
         if (!isEdit) {
             postData(routeName, formData)
                 .then((result) => {
-                    console.log('Category data post successfully:', result);
+                    // console.log('Category data post successfully:', result);
                     resetFormData();
                     apiRefresh();
                 })

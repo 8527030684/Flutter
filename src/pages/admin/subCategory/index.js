@@ -75,6 +75,7 @@ const SubCategory = () => {
         reader.onload = () => {
         setPreviewImage(reader.result);
         };
+        setIsLoading(false);
         reader.readAsDataURL(e.target.files[0]);
         console.log("previewImage ", previewImage);
     }
