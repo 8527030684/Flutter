@@ -10,10 +10,33 @@ import CropperImage from "../../common/cropperImage.js";
 import debounce from 'lodash/debounce';
 import CustomPagination from '../../../components/common/CustomPagination';
 import { NUMBER } from "../../../constant/number";
+import { useForm } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
+
+const categorySchema = Yup.object({
+    name: Yup.string().required('Name is required'),
+    priority: Yup.string().required('Priority is required'),
+    status: Yup.string().required('Status is required'),
+    logo: Yup.string().required('Logo is required')
+    // .test("is-valid-type", "Not a valid image type",
+    //   value => isValidFileType(value && value.name.toLowerCase(), "image"))
+    // .test("is-valid-size", "Max allowed size is 100KB",
+    //   value => value && value.size <= MAX_FILE_SIZE)
+});
 
 const Category = () => {
+
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    setValue,
+    formState: { errors, defaultValues }
+  } = useForm({ resolver: yupResolver(categorySchema) });
+  console.log(errors, 'errorserrors', getValues());
+
     const [image, setImage] = useState("");
-    // const inputRef = useRef();
     const cropperRef = useRef(null);
     const [previewImage, setPreviewImage] = useState('');
     const [show, setShow] = useState(false);
@@ -70,47 +93,57 @@ const Category = () => {
         // setImage(inputRef.current.value);
         console.log({[name]: value}, '[name]: value[name]: value');
         setFormData(pre => ({ ...pre, [name]: value}));
+        setFormData(pre => ({ ...pre, [name]: value}));
     };
+
+    console.log("formData formData", formData);
 
     // for uploading image
     const UploadImage = (e) => {
+        const { name } = e.target;
+        console.log('---name-', name)
         setIsLoading(true);
-        console.log('aaaaaa');
-        console.log('isLoading11', isLoading);
         const reader = new FileReader();
         reader.onload = () => {
         setPreviewImage(reader.result);
         };
         setIsLoading(false);
-        console.log('isLoading22', isLoading);
         reader.readAsDataURL(e.target.files[0]);
-        // console.log("previewImage ", previewImage);
+        setFormData(pre => ({ ...pre, logo: reader.result}));
     }
 
     const croppedImage = (image) => {
-        // console.log('----', image);
+        console.log('----', image);
         const formDataFile = new FormData();
         formDataFile.append("file", image);
         postData("/fileUpload", formDataFile)
         .then((result) => {
             setFormData(pre => ({ ...pre, logo: result.url }));
             console.log('Uploading images successfully:', result.url);
+            setValue("logo", result.url);
             setIsLoading(false);
         })
         .catch((error) => {
-            // console.error("Uploading images into api");
+            console.error("Uploading images into api");
             setIsLoading(false);
         });
     }
 
-    const handlePostData = (e) => {
-        e.preventDefault();
-        // console.log("subcategory data ", formData.id);
+    const handlePostData = (data) => {
+        // console.log(formData, '--', event);
+        // event.preventDefault();
+        categoryPostData(data);
+    };
+
+    const categoryPostData = (formData) => {
+        console.log("category data ", formData.id);
+        console.log("category formData Status ", formData.status);
+        console.log("category data 2 ", formData);
         const routeName = !isEdit ? '/categories' : `/categories/${formData.id}`;
         if (!isEdit) {
             postData(routeName, formData)
                 .then((result) => {
-                    // console.log('Category data post successfully:', result);
+                    console.log('Category data post successfully:', result);
                     resetFormData();
                     apiRefresh();
                 })
@@ -142,7 +175,8 @@ const Category = () => {
         }
         try {
             const categoryData = await fetchData(routeName)
-            if (id) {
+            if (id)
+ {
                 setFormData({
                 id: categoryData._id,
                 name: categoryData.name,
@@ -160,6 +194,7 @@ const Category = () => {
             console.error('Error fetching data:', err);
         }
     }
+
     function handleSearch(query) {
         try {
             fetchCategories(null, query);
@@ -187,6 +222,7 @@ const Category = () => {
         // Call the fetchData function
         fetchCategories(null, null, true);
     },[]);
+
     return (
         <>
             <div className="admin-common-body">
@@ -306,7 +342,7 @@ const Category = () => {
                     }} />
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={(e) => handlePostData(e)}>
+                    <Form onSubmit={handleSubmit(handlePostData)}>
                         <Row className="modal-body-form">
                             <Col xs={12} sm={12} className=" ">
                                 <Form.Group className="form-mt-space">
@@ -314,12 +350,13 @@ const Category = () => {
                                     <div className="wrap-input">
                                         <Form.Control
                                             type="type"
-                                            className="form-input"
                                             placeholder="Enter name"
                                             id="name"
                                             name="name"
-                                            value={formData.name}
+                                            // value={formData.name}
                                             onChange={handleInputChange}
+                                            {...register("name")}
+                                            className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                                         />
                                     </div>
                                 </Form.Group>
@@ -330,12 +367,12 @@ const Category = () => {
                                     <div className="wrap-input">
                                         <Form.Control
                                             type="number"
-                                            className="form-input"
                                             placeholder="Enter priority"
                                             id="priority"
                                             name="priority"
-                                            value={formData.priority}
+                                            // value={formData.priority}
                                             onChange={handleInputChange}
+                                            {...register("priority")} className={`form-control ${errors.priority ? 'is-invalid' : ''}`}
                                         />
                                     </div>
                                 </Form.Group>
@@ -344,7 +381,7 @@ const Category = () => {
                                 <div className="wrap-select wrap-input">
                                     <Form.Label>Status</Form.Label>
                                     <Form.Group className="mb-3">
-                                        <Form.Select value={formData.status} name="status" onChange={handleInputChange}>
+                                        <Form.Select {...register("status")} name="status" onChange={handleInputChange}>
                                         {!isEdit ? <option value="" default>Select Status</option> : ''}
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
@@ -355,7 +392,7 @@ const Category = () => {
                             <Col xs={12} sm={12} className="upload-file-wrapper">
                                 <Form.Group className="form-mt-space react-upload-file">
                                     <Form.Label>Logo (Optional)</Form.Label>
-                                    <Form.Control type="file" name='logo' onChange={UploadImage} disabled={isLoading} />
+                                    <Form.Control {...register('file')} type='file' name='logo' id='logo' onChange={UploadImage} disabled={isLoading} />
                                 </Form.Group>
                                 {isLoading && <CustomLoader />}
                             </Col>
