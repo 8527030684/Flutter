@@ -7,8 +7,36 @@ import AdminHeader from "../adminHeader";
 import { deleteData, fetchData, postData, updateData } from "../../../apis/api";
 import CustomLoader from "../../customLoader/customLoader";
 import CropperImage from "../../common/cropperImage";
+import { useForm } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
+
+const productSchema = Yup.object({
+    productName: Yup.string().required('Product Name is required'),
+    category: Yup.string().required('Select category'),
+    subCategory: Yup.string().required('Select subCategory'),
+    productImage: Yup.string().required('Product Image is required'),
+    thumbnailImage: Yup.string().required('Thumbnail Image is required'),
+    unit: Yup.string().required('Unit is required'),
+    totalPrice: Yup.string().required('Total Price is required'),
+    discountPrice: Yup.string().required('Discount Price is required'),
+    shippingCost: Yup.string().required('Shipping Cost is required'),
+    description: Yup.string().required('description is required'),
+    status: Yup.string().required('Status is required'),
+});
+
 
 const Product = () => {
+
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        formState: { errors, defaultValues }
+      } = useForm({ resolver: yupResolver(productSchema) });
+      console.log(errors, 'errorserrors', getValues());
+
     const [image, setImage] = useState("");
     const [image2, setImage2] = useState("");
     const inputRef = useRef();
@@ -103,6 +131,7 @@ const Product = () => {
         postData("/fileUpload", formDataFile)
         .then((result) => {
             setFormData(pre => ({ ...pre, productImage: result.url, thumbnailImage: result.url }));
+            setValue(result.url);
             setIsLoading(false);
             setIsLoad(false);
             console.log('Uploading images successfully:', result.url);
@@ -114,9 +143,13 @@ const Product = () => {
         });
     }
 
-    const handlePostData = (e) => {
-        e.preventDefault();
-        console.log("subcategory data ", formData.id);
+    const handlePostData = (data) => {
+        productData(data);
+    };
+
+    const productData = (formData) => {
+        // e.preventDefault();
+        console.log("Product information ", formData.productImage, formData.thumbnailImage);
         const routeName = !isEdit ? '/product' : `/product/${formData.id}`;
         if (!isEdit) {
             postData(routeName, formData)
@@ -313,25 +346,26 @@ const Product = () => {
                     }} />
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={(e) => handlePostData(e)}>
+                    <Form onSubmit={handleSubmit(handlePostData)}>
                         <Row className="modal-body-form">
                             <Col xs={12} sm={12} className=" ">
                                 <Form.Group className="form-mt-space">
                                     <Form.Label>Enter Product Name</Form.Label>
                                     <Form.Control
                                         type="type"
-                                        className="form-input"
                                         placeholder="Enter Product Name"
                                         name="productName"
-                                        value={formData.productName}
+                                        // value={formData.productName}
                                         onChange={handleInputChange}
+                                        {...register("productName")}
+                                        className={`form-control ${errors.productName ? 'is-invalid' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
                             <Col xs={12} sm={12} className=" ">
                                 <Form.Label>Category</Form.Label>
                                 <Form.Group className="form-mt-space">
-                                    <Form.Select value={formData.category} name="category" onChange={handleInputChange}>
+                                    <Form.Select {...register("category")} name="category" onChange={handleInputChange}>
                                         {!isEdit ? <option value="" default>Select Category</option> : ''}
                                         {category?.map((cat, index) => (
                                             <option value={cat?._id} key={index + 1}>{cat?.name}</option>
@@ -343,7 +377,7 @@ const Product = () => {
                             <Col xs={12} sm={12} className=" ">
                                 <Form.Label>Sub-Category</Form.Label>
                                 <Form.Group className="form-mt-space">
-                                    <Form.Select value={formData.subCategory} name="subCategory" onChange={handleInputChange}>
+                                    <Form.Select {...register("subCategory")} name="subCategory" onChange={handleInputChange}>
                                     {!isEdit ? <option value="" default>Select Sub Category</option> : ''}
                                         {subCategory?.map((subCat, index) => (
                                             <option value={subCat?._id} key={index + 1}>{subCat?.name}</option>
@@ -355,7 +389,7 @@ const Product = () => {
                             <Col xs={12} sm={12} className="upload-file-wrapper">
                                 <Form.Group className="form-mt-space react-upload-file">
                                     <Form.Label>Product Image</Form.Label>
-                                    <Form.Control type="file" name='productImage' onChange={(e) => UploadImage(e, "productImage")} disabled={isLoading} />
+                                    <Form.Control {...register('file')} type="file" name='productImage' id="productImage" onChange={(e) => UploadImage(e, "productImage")} disabled={isLoading} />
                                 </Form.Group>
                                 {isLoading && <CustomLoader />}
                             </Col>
@@ -365,7 +399,7 @@ const Product = () => {
                             <Col xs={12} sm={12} className="upload-file-wrapper">
                                 <Form.Group className="form-mt-space react-upload-file">
                                     <Form.Label>Product Image</Form.Label>
-                                    <Form.Control type="file" name='Thumbnail' onChange={(e) => UploadImage(e, "thumbnailImage")} disabled={isLoad} />
+                                    <Form.Control {...register('file')} type="file" name='thumbnailImage' id='thumbnailImage' onChange={(e) => UploadImage(e, "thumbnailImage")} disabled={isLoad} />
                                 </Form.Group>
                                 {isLoad && <CustomLoader />}
                             </Col>
@@ -377,11 +411,12 @@ const Product = () => {
                                     <Form.Label>Unit (eg. kg, grm, lit)</Form.Label>
                                     <Form.Control
                                         type="tel"
-                                        className="form-input"
                                         placeholder="Enter Unit"
                                         name="unit"
-                                        value={formData.unit}
+                                        // value={formData.unit}
                                         onChange={handleInputChange}
+                                        {...register("unit")}
+                                        className={`form-control ${errors.unit ? 'is-invalid' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -390,11 +425,12 @@ const Product = () => {
                                     <Form.Label>Total Price</Form.Label>
                                     <Form.Control
                                         type="number"
-                                        className="form-input"
                                         placeholder="Enter Total Price"
                                         name="totalPrice"
-                                        value={formData.totalPrice}
+                                        // value={formData.totalPrice}
                                         onChange={handleInputChange}
+                                        {...register("totalPrice")}
+                                        className={`form-control ${errors.totalPrice ? 'is-invalid' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -403,11 +439,12 @@ const Product = () => {
                                     <Form.Label>Discount Price</Form.Label>
                                     <Form.Control
                                         type="number"
-                                        className="form-input"
                                         placeholder="Enter Discount Price"
                                         name="discountPrice"
-                                        value={formData.discountPrice}
+                                        // value={formData.discountPrice}
                                         onChange={handleInputChange}
+                                        {...register("discountPrice")}
+                                        className={`form-control ${errors.discountPrice ? 'is-invalid' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -416,11 +453,12 @@ const Product = () => {
                                     <Form.Label>Shipping Cost (Optional)</Form.Label>
                                     <Form.Control
                                         type="number"
-                                        className="form-input"
                                         placeholder="Enter Shipping Cost"
                                         name="shippingCost"
-                                        value={formData.shippingCost}
+                                        // value={formData.shippingCost}
                                         onChange={handleInputChange}
+                                        {...register("shippingCost")}
+                                        className={`form-control ${errors.shippingCost ? 'is-invalid' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -428,7 +466,7 @@ const Product = () => {
                                 <div className="wrap-select wrap-input">
                                     <Form.Label>Status</Form.Label>
                                     <Form.Group className="mb-3">
-                                        <Form.Select value={formData.status} name="status" onChange={handleInputChange}>
+                                        <Form.Select {...register("status")} name="status" onChange={handleInputChange}>
                                             {!isEdit ? <option value="" default>Select Status</option> : ''}
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
@@ -443,10 +481,12 @@ const Product = () => {
                                         <textarea
                                             rows={4}
                                             cols={40}
-                                            className="w-100"
                                             name="description"
-                                            value={formData.description}
-                                            onChange={handleInputChange} />
+                                            // value={formData.description}
+                                            onChange={handleInputChange}
+                                            {...register("description")}
+                                            className={`form-control w-100 ${errors.description ? 'is-invalid' : ''}`}
+                                        />
                                     </Form.Group>
                                 </div>
                             </Col>

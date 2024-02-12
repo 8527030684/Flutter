@@ -19,10 +19,6 @@ const categorySchema = Yup.object({
     priority: Yup.string().required('Priority is required'),
     status: Yup.string().required('Status is required'),
     logo: Yup.string().required('Logo is required')
-    // .test("is-valid-type", "Not a valid image type",
-    //   value => isValidFileType(value && value.name.toLowerCase(), "image"))
-    // .test("is-valid-size", "Max allowed size is 100KB",
-    //   value => value && value.size <= MAX_FILE_SIZE)
 });
 
 const Category = () => {
@@ -37,7 +33,6 @@ const Category = () => {
   console.log(errors, 'errorserrors', getValues());
 
     const [image, setImage] = useState("");
-    const cropperRef = useRef(null);
     const [previewImage, setPreviewImage] = useState('');
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -90,9 +85,7 @@ const Category = () => {
     //for submiting data into database
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        // setImage(inputRef.current.value);
         console.log({[name]: value}, '[name]: value[name]: value');
-        setFormData(pre => ({ ...pre, [name]: value}));
         setFormData(pre => ({ ...pre, [name]: value}));
     };
 
@@ -130,15 +123,11 @@ const Category = () => {
     }
 
     const handlePostData = (data) => {
-        // console.log(formData, '--', event);
-        // event.preventDefault();
         categoryPostData(data);
     };
 
     const categoryPostData = (formData) => {
-        console.log("category data ", formData.id);
         console.log("category formData Status ", formData.status);
-        console.log("category data 2 ", formData);
         const routeName = !isEdit ? '/categories' : `/categories/${formData.id}`;
         if (!isEdit) {
             postData(routeName, formData)
