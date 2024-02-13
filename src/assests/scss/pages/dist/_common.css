@@ -160,6 +160,10 @@
   color: #666666d9;
   text-transform: uppercase;
 }
+.main-menu .nav-link a {
+  color: #666666d9;
+  text-decoration: none;
+}
 
 .main-section .main-pc {
   position: relative;
@@ -755,4 +759,32 @@ textarea {
 .toast-common .Toastify__toast-body div {
   line-height: normal;
   color: #efefef;
+}
+
+.notification-top-arrow {
+  background-color: #f1f1f1;
+  border-radius: 0 10px 10px 10px;
+  text-align: left;
+  max-width: 558px;
+  width: 100%;
+  margin-left: 41px;
+  position: absolute;
+  z-index: 1;
+}
+.notification-top-arrow .menu-notification.dropdown-item {
+  font-size: 14px;
+  line-height: 160%;
+  font-weight: 500;
+  color: #666666d9;
+  text-transform: capitalize;
+  padding: 8px 16px;
+}
+.notification-top-arrow .menu-notification.dropdown-item:hover {
+  background-color: #bca362;
+  color: #fff;
+}
+.notification-top-arrow .total-results {
+  font-size: 14px;
+  padding: 16px;
+  display: block;
 }

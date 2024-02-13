@@ -331,7 +331,7 @@ const Category = () => {
                     }} />
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={handleSubmit(handlePostData)}>
+                    <Form onSubmit={handleSubmit(handlePostData)} defaultValues={defaultValues}>
                         <Row className="modal-body-form">
                             <Col xs={12} sm={12} className=" ">
                                 <Form.Group className="form-mt-space">
@@ -345,6 +345,7 @@ const Category = () => {
                                             // value={formData.name}
                                             onChange={handleInputChange}
                                             {...register("name")}
+                                            register="name"
                                             className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                                         />
                                     </div>

@@ -41,6 +41,7 @@ const Product = () => {
     const [image2, setImage2] = useState("");
     const inputRef = useRef();
     const [previewImage, setPreviewImage] = useState('');
+    const [thumbnailImage, setThumbnailImage] = useState('');
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -114,14 +115,24 @@ const Product = () => {
     // for uploading image
     const UploadImage = (e, ref) => {
         ref === 'productImage' ? setIsLoading(true) : setIsLoad(true);
+        console.log("refrefrefrefrefref", ref);
+        console.log("eeeeeeeeeee", e.name);
         const reader = new FileReader();
         reader.onload = () => {
-        setPreviewImage(reader.result);
+        if(ref === 'productImage') {
+            setPreviewImage(reader.result);
+            console.log("setPreviewImage(reader.result)1111", reader.result)
+        } else {
+            setThumbnailImage(reader.result);
+            console.log("thumbnailImage(reader.result)2222",reader.result)
+        }
+
         };
         setIsLoading(false);
         setIsLoad(false);
         reader.readAsDataURL(e.target.files[0]);
         console.log("previewImage ", previewImage);
+        console.log("thumbnailImage ", thumbnailImage);
     }
 
     const croppedImage = (image) => {
@@ -131,7 +142,9 @@ const Product = () => {
         postData("/fileUpload", formDataFile)
         .then((result) => {
             setFormData(pre => ({ ...pre, productImage: result.url, thumbnailImage: result.url }));
-            setValue(result.url);
+            // setValue(name, result);
+            setValue("productImage", result.url);
+            setValue("thumbnailImage", result.url);
             setIsLoading(false);
             setIsLoad(false);
             console.log('Uploading images successfully:', result.url);
@@ -315,7 +328,7 @@ const Product = () => {
                                         </div>
                                         <div className="td flex-table-column-35">
                                             <img src={item.productImage} alt="Product images" width="50px" style={{marginRight: 10}} />
-                                            <img src={item.thumbnailImage} alt="Product images" width="50px" />
+                                            <img src={item.thumbnailImage} alt="Thumbnail images" width="50px" />
                                         </div>
                                         <div className="td flex-table-column-15">
                                             <div className="listing-normal">
@@ -398,13 +411,13 @@ const Product = () => {
                             </Col>
                             <Col xs={12} sm={12} className="upload-file-wrapper">
                                 <Form.Group className="form-mt-space react-upload-file">
-                                    <Form.Label>Product Image</Form.Label>
+                                    <Form.Label>Thumbnail Image</Form.Label>
                                     <Form.Control {...register('file')} type="file" name='thumbnailImage' id='thumbnailImage' onChange={(e) => UploadImage(e, "thumbnailImage")} disabled={isLoad} />
                                 </Form.Group>
                                 {isLoad && <CustomLoader />}
                             </Col>
                             <Col xs={12} sm={12} className="p-0">
-                                {previewImage && ( <CropperImage previewImage={previewImage} croppedImage= {croppedImage} />)}
+                                {thumbnailImage && ( <CropperImage previewImage={thumbnailImage} croppedImage= {croppedImage} />)}
                             </Col>
                             <Col xs={12} sm={12} className=" ">
                                 <Form.Group className="form-mt-space">
