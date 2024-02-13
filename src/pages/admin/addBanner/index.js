@@ -7,8 +7,31 @@ import AdminHeader from "../adminHeader";
 import { deleteData, fetchData, postData, updateData } from "../../../apis/api";
 import CustomLoader from "../../customLoader/customLoader";
 import CropperImage from "../../common/cropperImage";
+import { useForm } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
+
+const bannerSchema = Yup.object({
+    bannerImage: Yup.string().required('Banner image is required'),
+    heading: Yup.string().required('Heading is required'),
+    categoryId: Yup.string().required('Select category'),
+    subCategoryId: Yup.string().required('Select sub categoryId'),
+    subheading: Yup.string().required('Sub heading is required'),
+    ctaButton: Yup.string().required('CTA button is required'),
+    status: Yup.string().required('Status is required')
+});
 
 const AddBanner = () => {
+
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        formState: { errors, defaultValues }
+      } = useForm({ resolver: yupResolver(bannerSchema) });
+      console.log(errors, 'errorserrors', getValues());
+
     const [image, setImage] = useState("");
     const inputRef = useRef();
     const [previewImage, setPreviewImage] = useState('');
@@ -95,6 +118,7 @@ const AddBanner = () => {
         .then((result) => {
             setFormData(pre => ({ ...pre, bannerImage: result.url }));
             setIsLoading(false);
+            setValue("bannerImage", result.url);
             console.log('Uploading images successfully:', result.url);
         })
         .catch((error) => {
@@ -103,9 +127,13 @@ const AddBanner = () => {
         });
     }
 
-    const handlePostData = (e) => {
-        e.preventDefault();
-        console.log("Banner data ", formData.id);
+    const handlePostData = (data) => {
+        bannerData(data);
+    };
+
+    const bannerData = (formData) => {
+        // e.preventDefault();
+        console.log("Banner data ", formData.bannerImage);
         const routeName = !isEdit ? '/banners' : `/banners/${formData.id}`;
         if (!isEdit) {
             postData(routeName, formData)
@@ -303,13 +331,13 @@ const AddBanner = () => {
                     }} />
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={(e) => handlePostData(e)}>
+                    <Form onSubmit={handleSubmit(handlePostData)}>
                         <Row className="modal-body-form">
                             <Col xs={12} sm={12} className=" ">
                                 <div className="wrap-select wrap-input">
                                     <Form.Label>Category</Form.Label>
                                     <Form.Group className="mb-3">
-                                        <Form.Select value={formData.category} name="categoryId" onChange={handleInputChange}>
+                                        <Form.Select {...register("categoryId")} name="categoryId" onChange={handleInputChange}>
                                             {!isEdit ? <option value="" default>Select Category</option> : ''}
                                             {category?.map((cat, index) => (
                                                 <option value={cat?._id} key={index + 1}>{cat?.name}</option>
@@ -323,7 +351,7 @@ const AddBanner = () => {
                                 <div className="wrap-select wrap-input">
                                     <Form.Label>SubCategory</Form.Label>
                                     <Form.Group className="mb-3">
-                                        <Form.Select value={formData.subCategory} name="subCategoryId" onChange={handleInputChange}>
+                                        <Form.Select {...register("subCategoryId")} name="subCategoryId" onChange={handleInputChange}>
                                             {!isEdit ? <option value="" default>Select Sub Category</option> : ''}
                                             {subCategory?.map((subCat, index) => (
                                                 <option value={subCat?._id} key={index + 1}>{subCat?.name}</option>
@@ -336,7 +364,7 @@ const AddBanner = () => {
                             <Col xs={12} sm={12} className="upload-file-wrapper">
                                 <Form.Group className="form-mt-space react-upload-file">
                                     <Form.Label>Banner Image</Form.Label>
-                                    <Form.Control type="file" name='bannerImage' onChange={UploadImage} disabled={isLoading} />
+                                    <Form.Control {...register('file')} type="file" name='bannerImage' id="bannerImage" onChange={UploadImage} disabled={isLoading} />
                                 </Form.Group>
                                 {isLoading && <CustomLoader />}
                             </Col>
@@ -349,11 +377,12 @@ const AddBanner = () => {
                                     <div className="wrap-input">
                                         <Form.Control
                                             type="text"
-                                            className="form-input"
                                             placeholder="Enter heading"
                                             name="heading"
-                                            value={formData.heading}
+                                            // value={formData.heading}
                                             onChange={handleInputChange}
+                                            {...register("heading")}
+                                            className={`form-control ${errors.heading ? 'is-invalid' : ''}`}
                                         />
                                     </div>
                                 </Form.Group>
@@ -364,11 +393,12 @@ const AddBanner = () => {
                                     <div className="wrap-input">
                                         <Form.Control
                                             type="text"
-                                            className="form-input"
                                             placeholder="Enter heading"
                                             name="subheading"
-                                            value={formData.subheading}
+                                            // value={formData.subheading}
                                             onChange={handleInputChange}
+                                            {...register("subheading")}
+                                            className={`form-control ${errors.subheading ? 'is-invalid' : ''}`}
                                         />
                                     </div>
                                 </Form.Group>
@@ -379,11 +409,12 @@ const AddBanner = () => {
                                     <div className="wrap-input">
                                         <Form.Control
                                             type="text"
-                                            className="form-input"
                                             placeholder="Enter ctaButton"
                                             name="ctaButton"
-                                            value={formData.ctaButton}
+                                            // value={formData.ctaButton}
                                             onChange={handleInputChange}
+                                            {...register("ctaButton")}
+                                            className={`form-control ${errors.ctaButton ? 'is-invalid' : ''}`}
                                         />
                                     </div>
                                 </Form.Group>
@@ -392,7 +423,7 @@ const AddBanner = () => {
                                 <div className="wrap-select wrap-input">
                                     <Form.Label>Status</Form.Label>
                                     <Form.Group className="mb-3">
-                                        <Form.Select value={formData.status} name="status" onChange={handleInputChange}>
+                                        <Form.Select {...register("status")} name="status" onChange={handleInputChange}>
                                             {!isEdit ? <option value="" default>Select Status</option> : ''}
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>

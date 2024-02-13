@@ -191,6 +191,10 @@
         font-weight: 600;
         color: #666666d9;
         text-transform: uppercase;
+        a {
+            color: #666666d9;
+            text-decoration: none;
+        }
     }
 }
 
@@ -856,5 +860,35 @@ textarea {
             line-height: normal;
             color: #efefef;
         }
+    }
+}
+.notification-top-arrow {
+    background-color: #f1f1f1;
+    border-radius: 0 10px 10px 10px;
+    text-align: left;
+    max-width: 558px;
+    width: 100%;
+    margin-left: 41px;
+    position: absolute;
+    z-index: 1;
+    .menu-notification.dropdown-item {
+        font-size: 14px;
+        line-height: 160%;
+        font-weight: 500;
+        color: #666666d9;
+        text-transform: capitalize;
+        padding: 8px 16px;
+        &:hover {
+            background-color: #bca362;
+            color: #fff;
+        }
+    }
+    .total-results {
+        font-size: 14px;
+        padding: 16px;
+        display: block;
+    }
+    .menu-notification-right {
+        
     }
 }
