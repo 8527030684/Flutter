@@ -184,7 +184,12 @@ const Category = () => {
                 status: categoryData.status,
                 logo: categoryData.logo,
                 });
-                setIsEdit(true)
+                setPreviewImage(categoryData.logo);
+                // Set pre-filled values using setValue
+                // Object.keys(formData).forEach((key) => {
+                // setValue(formData);
+                // });
+                setIsEdit(true);
                 handleShow();
             } else {
                 setCategory(categoryData);

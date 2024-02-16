@@ -172,6 +172,7 @@ const AddBanner = () => {
                     ctaButton: bannerData.ctaButton,
                     status: bannerData.status
                 });
+                setPreviewImage(bannerData.bannerImage);
                 setIsEdit(true);
                 handleShow();
             } else {

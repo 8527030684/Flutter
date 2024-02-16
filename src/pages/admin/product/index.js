@@ -187,6 +187,8 @@ const Product = () => {
                     description: productData.description,
                     status: productData.status,
                 });
+                setPreviewImage(productData.productImage);
+                setPreviewImage(productData.thumbnailImage);
                 setIsEdit(true);
                 handleShow();
             } else {

@@ -140,6 +140,7 @@ const SubCategory = () => {
                     status: categoryData.status,
                     logo: categoryData.logo,
                 });
+                setPreviewImage(categoryData.logo);
                 setIsEdit(true)
                 handleShow();
             } else {
