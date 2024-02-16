@@ -253,6 +253,13 @@ const Product = () => {
         fetchCategories();
     }, []);
 
+    // Pass the value from formData to the respective form fields using setValue
+    useEffect(() => {
+        Object.keys(formData).forEach(key => {
+            setValue(key, formData[key]);
+        });
+    }, [formData]);
+
     return (
         <>
             <div className="admin-right-main">
