@@ -7,8 +7,31 @@ import AdminHeader from "../adminHeader";
 import { deleteData, fetchData, postData, updateData } from "../../../apis/api";
 import CustomLoader from "../../customLoader/customLoader";
 import CropperImage from "../../common/cropperImage";
+import { NUMBER } from "../../../constant/number";
+import { useForm } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
+
+const subCategorySchema = Yup.object({
+    categoryId: Yup.string().required('Select category'),
+    name: Yup.string().required('Name is required'),
+    priority: Yup.string().required('Priority is required'),
+    status: Yup.string().required('Status is required'),
+    logo: Yup.string().required('Logo is required')
+});
 
 const SubCategory = () => {
+
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        formState: { errors, defaultValues }
+      } = useForm({ resolver: yupResolver(subCategorySchema) });
+      console.log(errors, 'errorserrors', getValues());
+
+
     const [image, setImage] = useState("");
     const inputRef = useRef();
     const [previewImage, setPreviewImage] = useState('');
@@ -89,6 +112,7 @@ const SubCategory = () => {
             setFormData(pre => ({ ...pre, logo: result.url }));
             console.log('Uploading images successfully:', result.url);
             setIsLoading(false);
+            setValue("logo", result.url);
         })
         .catch((error) => {
             console.error("Uploading images into api");
@@ -96,10 +120,15 @@ const SubCategory = () => {
         });
     }
 
-    const handlePostData = (e) => {
-        e.preventDefault();
-        console.log("subcategory data ", formData.id);
-        console.log("categoryId ", formData.categoryId);
+    const handlePostData = (data) => {
+        subCategoryPostData(data);
+    };
+
+    const subCategoryPostData = (formData) => {
+        // e.preventDefault();
+        // console.log("subcategory data ", formData.id);
+        // console.log("categoryId ", formData.categoryId);
+        console.log("category formData Status ", formData.status);
         const routeName = !isEdit ? '/subCategories' : `/subCategories/${formData.id}`;
         if (!isEdit) {
             postData(routeName, formData, { accept: 'application/json' })
@@ -167,6 +196,13 @@ const SubCategory = () => {
         fetchSubCategories();
         fetchCategories();
     }, []);
+
+     // Pass the value from formData to the respective form fields using setValue
+    useEffect(() => {
+        Object.keys(formData).forEach(key => {
+            setValue(key, formData[key]);
+        });
+    }, [formData]);
 
     return (
         <>
@@ -290,13 +326,13 @@ const SubCategory = () => {
                     }} />
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={(e) => handlePostData(e)}>
+                    <Form onSubmit={handleSubmit(handlePostData)}>
                         <Row className="modal-body-form">
                             <Col xs={12} sm={12} className=" ">
                                 <div className="wrap-select wrap-input">
                                     <Form.Label>Category</Form.Label>
                                     <Form.Group className="mb-3">
-                                        <Form.Select value={formData.category} name="categoryId" onChange={handleInputChange}>
+                                        <Form.Select {...register("categoryId")} name="categoryId" id="categoryId" onChange={handleInputChange}>
                                             {category?.map((cat, index) => (
                                                 <option value={cat?._id} key={index + 1}>{cat?.name}</option>
                                             )
@@ -311,12 +347,14 @@ const SubCategory = () => {
                                     <div className="wrap-input">
                                         <Form.Control
                                             type="type"
-                                            className="form-input"
                                             placeholder="Enter name"
                                             name="name"
+                                            id="name"
                                             autoComplete="off"
-                                            value={formData.name}
+                                            // value={formData.name}
                                             onChange={handleInputChange}
+                                            {...register("name")}
+                                            className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                                         />
                                     </div>
                                 </Form.Group>
@@ -327,12 +365,13 @@ const SubCategory = () => {
                                     <div className="wrap-input">
                                         <Form.Control
                                             type="type"
-                                            className="form-input"
                                             placeholder="Enter priority"
                                             name="priority"
                                             autoComplete="off"
-                                            value={formData.priority}
+                                            // value={formData.priority}
                                             onChange={handleInputChange}
+                                            {...register("priority")}
+                                            className={`form-control ${errors.priority ? 'is-invalid' : ''}`}
                                         />
                                     </div>
                                 </Form.Group>
@@ -341,7 +380,7 @@ const SubCategory = () => {
                                 <div className="wrap-select wrap-input">
                                     <Form.Label>Status</Form.Label>
                                     <Form.Group className="mb-3">
-                                        <Form.Select value={formData.status} name="status" onChange={handleInputChange}>
+                                        <Form.Select {...register("status")} name="status" onChange={handleInputChange}>
                                             {!isEdit ? <option value="" default>Select Status</option> : ''}
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
@@ -352,7 +391,7 @@ const SubCategory = () => {
                             <Col xs={12} sm={12} className="upload-file-wrapper">
                                 <Form.Group className="form-mt-space react-upload-file">
                                     <Form.Label>Logo (Optional)</Form.Label>
-                                    <Form.Control type="file" name='logo' onChange={UploadImage} disabled={isLoading} />
+                                    <Form.Control {...register('file')} type="file" name='logo' id='logo' onChange={UploadImage} disabled={isLoading} />
                                 </Form.Group>
                                 {isLoading && <CustomLoader />}
                             </Col>

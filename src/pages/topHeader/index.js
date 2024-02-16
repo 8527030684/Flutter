@@ -129,9 +129,7 @@ const TopHeader = () => {
                     key={data?._id}
                   >
                     <div className="menu-notification-right">
-                      <h6 className="notification-title">
-                        {data?.productName || ''}
-                      </h6>
+                      {data?.productName || ''}
                     </div>
                   </Dropdown.Item>
                 ))}
