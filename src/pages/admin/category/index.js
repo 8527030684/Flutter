@@ -23,14 +23,14 @@ const categorySchema = Yup.object({
 
 const Category = () => {
 
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    setValue,
-    formState: { errors, defaultValues }
-  } = useForm({ resolver: yupResolver(categorySchema) });
-  console.log(errors, 'errorserrors', getValues());
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        formState: { errors, defaultValues }
+    } = useForm({ resolver: yupResolver(categorySchema) });
+    console.log(errors, 'errorserrors', getValues());
 
     const [image, setImage] = useState("");
     const [previewImage, setPreviewImage] = useState('');
@@ -85,8 +85,9 @@ const Category = () => {
     //for submiting data into database
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        console.log({[name]: value}, '[name]: value[name]: value');
-        setFormData(pre => ({ ...pre, [name]: value}));
+        console.log({ [name]: value }, '[name]: value[name]: value');
+        setFormData(pre => ({ ...pre, [name]: value }));
+        setValue(e.target.name, e.target.value);
     };
 
     console.log("formData formData", formData);
@@ -98,11 +99,11 @@ const Category = () => {
         setIsLoading(true);
         const reader = new FileReader();
         reader.onload = () => {
-        setPreviewImage(reader.result);
+            setPreviewImage(reader.result);
         };
         setIsLoading(false);
         reader.readAsDataURL(e.target.files[0]);
-        setFormData(pre => ({ ...pre, logo: reader.result}));
+        setFormData(pre => ({ ...pre, logo: reader.result }));
     }
 
     const croppedImage = (image) => {
@@ -110,16 +111,16 @@ const Category = () => {
         const formDataFile = new FormData();
         formDataFile.append("file", image);
         postData("/fileUpload", formDataFile)
-        .then((result) => {
-            setFormData(pre => ({ ...pre, logo: result.url }));
-            console.log('Uploading images successfully:', result.url);
-            setValue("logo", result.url);
-            setIsLoading(false);
-        })
-        .catch((error) => {
-            console.error("Uploading images into api");
-            setIsLoading(false);
-        });
+            .then((result) => {
+                setFormData(pre => ({ ...pre, logo: result.url }));
+                console.log('Uploading images successfully:', result.url);
+                setValue("logo", result.url);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error("Uploading images into api");
+                setIsLoading(false);
+            });
     }
 
     const handlePostData = (data) => {
@@ -153,27 +154,30 @@ const Category = () => {
         }
     };
 
-    const fetchCategories = async (id, searchValue, isPaginate = true, pageData=1, sort='name', sortBy='asc') => {
+    const fetchCategories = async (id, searchValue, isPaginate = true, pageData = 1, sort = 'name', sortBy = 'asc') => {
         let routeName = id ? `/categories/${id}` : '/categories';
-        if(searchValue && isPaginate){
-            routeName= routeName+ `?filter=${searchValue}&page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
-        } else if(isPaginate){
-            routeName= routeName +`?page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
-        } else{
-            routeName= routeName +`?filter=${searchValue}&sort=${sort}&sortBy=${sortBy}` 
+        if (searchValue && isPaginate) {
+            routeName = routeName + `?filter=${searchValue}&page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else if (isPaginate) {
+            routeName = routeName + `?page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else {
+            routeName = routeName + `?filter=${searchValue}&sort=${sort}&sortBy=${sortBy}`
         }
         try {
             const categoryData = await fetchData(routeName)
-            if (id)
- {
+            if (id) {
                 setFormData({
-                id: categoryData._id,
-                name: categoryData.name,
-                priority: categoryData.priority.toString(), // Convert to string if needed
-                status: categoryData.status,
-                logo: categoryData.logo,
+                    id: categoryData._id,
+                    name: categoryData.name,
+                    priority: categoryData.priority.toString(), // Convert to string if needed
+                    status: categoryData.status,
+                    logo: categoryData.logo,
                 });
-                setIsEdit(true)
+                // Set pre-filled values using setValue
+                // Object.keys(formData).forEach((key) => {
+                // setValue(formData);
+                // });
+                setIsEdit(true);
                 handleShow();
             } else {
                 setCategory(categoryData);
@@ -210,7 +214,14 @@ const Category = () => {
     useEffect(() => {
         // Call the fetchData function
         fetchCategories(null, null, true);
-    },[]);
+    }, []);
+
+    // Pass the value from formData to the respective form fields using setValue
+    useEffect(() => {
+        Object.keys(formData).forEach(key => {
+            setValue(key, formData[key]);
+        });
+    }, [formData]);
 
     return (
         <>
@@ -249,7 +260,7 @@ const Category = () => {
                                 <div className="th flex-table-column-20" >
                                     <span className="table-heading">
                                         <span>Name</span>
-                                        <span className="icon-filter-custom" onClick={(e)=> handleSort('name')}>
+                                        <span className="icon-filter-custom" onClick={(e) => handleSort('name')}>
                                             <img src={defaultIcon} alt="filter icon" />
                                         </span>
                                     </span>
@@ -262,7 +273,7 @@ const Category = () => {
                                 <div className="th flex-table-column-20" >
                                     <span className="table-heading">
                                         <span>Priority</span>
-                                        <span className="icon-filter-custom" onClick={(e)=> handleSort('priority')}>
+                                        <span className="icon-filter-custom" onClick={(e) => handleSort('priority')}>
                                             <img src={defaultIcon} alt="filter icon" />
                                         </span>
                                     </span>
@@ -331,7 +342,7 @@ const Category = () => {
                     }} />
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={handleSubmit(handlePostData)} defaultValues={defaultValues}>
+                    <Form onSubmit={handleSubmit(handlePostData)}>
                         <Row className="modal-body-form">
                             <Col xs={12} sm={12} className=" ">
                                 <Form.Group className="form-mt-space">
@@ -342,7 +353,6 @@ const Category = () => {
                                             placeholder="Enter name"
                                             id="name"
                                             name="name"
-                                            // value={formData.name}
                                             onChange={handleInputChange}
                                             {...register("name")}
                                             register="name"
@@ -372,7 +382,7 @@ const Category = () => {
                                     <Form.Label>Status</Form.Label>
                                     <Form.Group className="mb-3">
                                         <Form.Select {...register("status")} name="status" onChange={handleInputChange}>
-                                        {!isEdit ? <option value="" default>Select Status</option> : ''}
+                                            {!isEdit ? <option value="" default>Select Status</option> : ''}
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
                                         </Form.Select>
@@ -387,7 +397,7 @@ const Category = () => {
                                 {isLoading && <CustomLoader />}
                             </Col>
                             <Col xs={12} sm={12} className="p-0">
-                                {previewImage && ( <CropperImage previewImage={previewImage} croppedImage= {croppedImage} />)}
+                                {(previewImage && isEdit) && (<CropperImage previewImage={previewImage} croppedImage={croppedImage} />)}
                             </Col>
                         </Row>
                         <div className="footer-modal">
