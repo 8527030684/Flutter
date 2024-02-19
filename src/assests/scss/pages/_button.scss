@@ -161,8 +161,8 @@ $shadow: #949494;
   position: relative;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  margin: 80px 0 150px 0;
+  // height: 100vh;
+  margin: 40px 0 50px 0;
 }
 
 .row-custom{
@@ -213,8 +213,9 @@ $shadow: #949494;
   display: block;
   height: 480px;
   background: var(--bg-grey);
-  padding: 10px;
+  padding: 14px;
   background-color: #f6f5f3;
+  border-radius: 4px;
 }
 
 .product-image-main img{
@@ -463,6 +464,10 @@ $shadow: #949494;
 .check-pincode {
   input {
     font-size: 14px;
+    border: 1px solid #bca362;
+    height: 35px;
+    padding: 5px 14px;
+    border-radius: 4px;
   }
 }
 

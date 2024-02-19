@@ -354,6 +354,7 @@ const Category = () => {
                                             placeholder="Enter name"
                                             id="name"
                                             name="name"
+                                            // value={formData.name}
                                             onChange={handleInputChange}
                                             {...register("name")}
                                             register="name"
