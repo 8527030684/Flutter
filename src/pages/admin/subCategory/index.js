@@ -198,11 +198,11 @@ const SubCategory = () => {
     }, []);
 
      // Pass the value from formData to the respective form fields using setValue
-    useEffect(() => {
-        Object.keys(formData).forEach(key => {
-            setValue(key, formData[key]);
-        });
-    }, [formData]);
+    // useEffect(() => {
+    //     Object.keys(formData).forEach(key => {
+    //         setValue(key, formData[key]);
+    //     });
+    // }, [formData]);
 
     return (
         <>
@@ -352,7 +352,7 @@ const SubCategory = () => {
                                             id="name"
                                             autoComplete="off"
                                             // value={formData.name}
-                                            onChange={handleInputChange}
+                                            // onChange={handleInputChange}
                                             {...register("name")}
                                             className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                                         />
@@ -369,7 +369,7 @@ const SubCategory = () => {
                                             name="priority"
                                             autoComplete="off"
                                             // value={formData.priority}
-                                            onChange={handleInputChange}
+                                            // onChange={handleInputChange}
                                             {...register("priority")}
                                             className={`form-control ${errors.priority ? 'is-invalid' : ''}`}
                                         />

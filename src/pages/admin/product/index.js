@@ -256,11 +256,11 @@ const Product = () => {
     }, []);
 
     // Pass the value from formData to the respective form fields using setValue
-    useEffect(() => {
-        Object.keys(formData).forEach(key => {
-            setValue(key, formData[key]);
-        });
-    }, [formData]);
+    // useEffect(() => {
+    //     Object.keys(formData).forEach(key => {
+    //         setValue(key, formData[key]);
+    //     });
+    // }, [formData]);
 
     return (
         <>
@@ -378,7 +378,7 @@ const Product = () => {
                                         placeholder="Enter Product Name"
                                         name="productName"
                                         // value={formData.productName}
-                                        onChange={handleInputChange}
+                                        // onChange={handleInputChange}
                                         {...register("productName")}
                                         className={`form-control ${errors.productName ? 'is-invalid' : ''}`}
                                     />
@@ -436,7 +436,7 @@ const Product = () => {
                                         placeholder="Enter Unit"
                                         name="unit"
                                         // value={formData.unit}
-                                        onChange={handleInputChange}
+                                        // onChange={handleInputChange}
                                         {...register("unit")}
                                         className={`form-control ${errors.unit ? 'is-invalid' : ''}`}
                                     />
@@ -450,7 +450,7 @@ const Product = () => {
                                         placeholder="Enter Total Price"
                                         name="totalPrice"
                                         // value={formData.totalPrice}
-                                        onChange={handleInputChange}
+                                        // onChange={handleInputChange}
                                         {...register("totalPrice")}
                                         className={`form-control ${errors.totalPrice ? 'is-invalid' : ''}`}
                                     />
@@ -464,7 +464,7 @@ const Product = () => {
                                         placeholder="Enter Discount Price"
                                         name="discountPrice"
                                         // value={formData.discountPrice}
-                                        onChange={handleInputChange}
+                                        // onChange={handleInputChange}
                                         {...register("discountPrice")}
                                         className={`form-control ${errors.discountPrice ? 'is-invalid' : ''}`}
                                     />
@@ -478,7 +478,7 @@ const Product = () => {
                                         placeholder="Enter Shipping Cost"
                                         name="shippingCost"
                                         // value={formData.shippingCost}
-                                        onChange={handleInputChange}
+                                        // onChange={handleInputChange}
                                         {...register("shippingCost")}
                                         className={`form-control ${errors.shippingCost ? 'is-invalid' : ''}`}
                                     />
@@ -505,7 +505,7 @@ const Product = () => {
                                             cols={40}
                                             name="description"
                                             // value={formData.description}
-                                            onChange={handleInputChange}
+                                            // onChange={handleInputChange}
                                             {...register("description")}
                                             className={`form-control w-100 ${errors.description ? 'is-invalid' : ''}`}
                                         />

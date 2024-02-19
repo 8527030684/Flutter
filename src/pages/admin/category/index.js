@@ -218,11 +218,11 @@ const Category = () => {
     }, []);
 
     // Pass the value from formData to the respective form fields using setValue
-    useEffect(() => {
-        Object.keys(formData).forEach(key => {
-            setValue(key, formData[key]);
-        });
-    }, [formData]);
+    // useEffect(() => {
+    //     Object.keys(formData).forEach(key => {
+    //         setValue(key, formData[key]);
+    //     });
+    // }, [formData]);
 
     return (
         <>
@@ -398,7 +398,7 @@ const Category = () => {
                                 {isLoading && <CustomLoader />}
                             </Col>
                             <Col xs={12} sm={12} className="p-0">
-                                {(previewImage && isEdit) && (<CropperImage previewImage={previewImage} croppedImage={croppedImage} />)}
+                                {previewImage && (<CropperImage previewImage={previewImage} croppedImage={croppedImage} />)}
                             </Col>
                         </Row>
                         <div className="footer-modal">
