@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Row, Dropdown, Button, Form, InputGroup, DropdownButton, Col, Modal, } from "react-bootstrap";
 import defaultIcon from '../../../assests/icons/defaultSort.svg';
 import closeIcon from '../../../assests/icons/close.svg';
-import Sidebar from "../../sidebar";
-import AdminHeader from "../adminHeader";
 import { deleteData, fetchData, postData, updateData } from "../../../apis/api";
 import CustomLoader from "../../customLoader/customLoader";
 import CropperImage from "../../common/cropperImage";
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import debounce from 'lodash/debounce';
+import { NUMBER } from "../../../constant/number";
+
+
 
 const bannerSchema = Yup.object({
     bannerImage: Yup.string().required('Banner image is required'),
@@ -28,9 +30,8 @@ const AddBanner = () => {
         handleSubmit,
         getValues,
         setValue,
-        formState: { errors, defaultValues }
+        formState: { errors }
       } = useForm({ resolver: yupResolver(bannerSchema) });
-      console.log(errors, 'errorserrors', getValues());
 
     const [image, setImage] = useState("");
     const inputRef = useRef();
@@ -55,6 +56,8 @@ const AddBanner = () => {
 
     // for deleting the row
     const [selectedItemId, setSelectedItemId] = useState(null);
+    const [page, setPage] = useState(1);
+    const [sorted, setSorted] = useState(false);
 
     // for fetch the data
     useEffect(() => {
@@ -166,7 +169,7 @@ const AddBanner = () => {
         fetchData(routeName)
             .then((result) => {
                 if (id === '') {
-                    setSubCategory(result);
+                    setSubCategory(result?.data);
                 }
             })
             .catch((error) => {
@@ -183,10 +186,15 @@ const AddBanner = () => {
         }
     }
 
-    const fetchBanner = async (id) => {
-        console.log("call edit function ", id);
-        const routeName = id ? `/banners/${id}` : '/banners';
-        console.log("call routeName ", routeName);
+    const fetchBanner = async (id, searchValue, isPaginate = true, pageData = 1, sort = 'name', sortBy = 'asc') => {
+        let routeName = id ? `/banners/${id}` : '/banners';
+        if (searchValue && isPaginate) {
+            routeName = routeName + `?filter=${searchValue}&page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else if (isPaginate) {
+            routeName = routeName + `?page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else {
+            routeName = routeName + `?filter=${searchValue}&sort=${sort}&sortBy=${sortBy}`
+        }
         try {
             const bannerData = await fetchData(routeName)
             if (id) {
@@ -204,7 +212,7 @@ const AddBanner = () => {
                 setIsEdit(true);
                 handleShow();
             } else {
-                setBanner(bannerData);
+                setBanner(bannerData?.data);
                 setIsEdit(false);
             }
         } catch (err) {
@@ -212,13 +220,29 @@ const AddBanner = () => {
         }
     }
 
+    const handleSort = (name) => {
+        setSorted(!sorted);
+        const sortBy = sorted ? 'asc' : 'desc';
+        fetchBanner(null, null, true, page, name, sortBy);
+    };
+
+    function handleSearch(query) {
+        try {
+            fetchBanner(null, query);
+        } catch (error) {
+            console.error('Error fetching search results:', error);
+        }
+    }
+
+    const debouncedHandleSearch = useCallback(debounce(handleSearch, 1000), []);
+
     // for fetch the data
     useEffect(() => {
         // Call the fetchData function
-        fetchBanner();
+        fetchBanner(null,null);
         fetchSubCategories();
         fetchCategories();
-    }, []);
+    }, [formData]);
 
     // Pass the value from formData to the respective form fields using setValue
     // useEffect(() => {
@@ -243,6 +267,7 @@ const AddBanner = () => {
                                         className="form-input search-input"
                                         type="search"
                                         placeholder="Search..."
+                                        onChange={(e) => debouncedHandleSearch(e.target.value)}
                                     />
                                 </InputGroup>
                             </Form>
@@ -263,7 +288,7 @@ const AddBanner = () => {
                                 <div className="th flex-table-column-25" >
                                     <span className="table-heading">
                                         <span>Heading</span>
-                                        <span className="icon-filter-custom">
+                                        <span className="icon-filter-custom" onClick={(e) => handleSort('heading')}>
                                             <img src={defaultIcon} alt="filter icon" />
                                         </span>
                                     </span>
@@ -271,7 +296,7 @@ const AddBanner = () => {
                                 <div className="th flex-table-column-25" >
                                     <span className="table-heading">
                                         <span>SubHeading</span>
-                                        <span className="icon-filter-custom">
+                                        <span className="icon-filter-custom" onClick={(e) => handleSort('subheading')}>
                                             <img src={defaultIcon} alt="filter icon" />
                                         </span>
                                     </span>
@@ -387,7 +412,7 @@ const AddBanner = () => {
                                             type="text"
                                             placeholder="Enter heading"
                                             name="heading"
-                                            // value={formData.heading}
+                                            value={formData.heading}
                                             onChange={handleInputChange}
                                             {...register("heading")}
                                             className={`form-control ${errors.heading ? 'is-invalid' : ''}`}
@@ -403,7 +428,7 @@ const AddBanner = () => {
                                             type="text"
                                             placeholder="Enter heading"
                                             name="subheading"
-                                            // value={formData.subheading}
+                                            value={formData.subheading}
                                             onChange={handleInputChange}
                                             {...register("subheading")}
                                             className={`form-control ${errors.subheading ? 'is-invalid' : ''}`}

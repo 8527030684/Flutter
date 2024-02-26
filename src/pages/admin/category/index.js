@@ -90,8 +90,6 @@ const Category = () => {
         setValue(e.target.name, e.target.value);
     };
 
-    console.log("formData formData", formData);
-
     // for uploading image
     const UploadImage = (e) => {
         const { name } = e.target;
@@ -164,7 +162,8 @@ const Category = () => {
             routeName = routeName + `?filter=${searchValue}&sort=${sort}&sortBy=${sortBy}`
         }
         try {
-            const categoryData = await fetchData(routeName)
+            const categoryData = await fetchData(routeName);
+            console.log('categoryData', categoryData);
             if (id) {
                 setFormData({
                     id: categoryData._id,
@@ -354,7 +353,7 @@ const Category = () => {
                                             placeholder="Enter name"
                                             id="name"
                                             name="name"
-                                            // value={formData.name}
+                                            value={formData.name}
                                             onChange={handleInputChange}
                                             {...register("name")}
                                             register="name"
@@ -372,7 +371,7 @@ const Category = () => {
                                             placeholder="Enter priority"
                                             id="priority"
                                             name="priority"
-                                            // value={formData.priority}
+                                            value={formData.priority}
                                             onChange={handleInputChange}
                                             {...register("priority")} className={`form-control ${errors.priority ? 'is-invalid' : ''}`}
                                         />

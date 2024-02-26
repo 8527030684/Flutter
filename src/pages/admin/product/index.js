@@ -1,15 +1,17 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Row, Dropdown, Button, Form, InputGroup, DropdownButton, Col, Modal, } from "react-bootstrap";
 import defaultIcon from '../../../assests/icons/defaultSort.svg';
 import closeIcon from '../../../assests/icons/close.svg';
-import Sidebar from "../../sidebar";
-import AdminHeader from "../adminHeader";
 import { deleteData, fetchData, postData, updateData } from "../../../apis/api";
 import CustomLoader from "../../customLoader/customLoader";
 import CropperImage from "../../common/cropperImage";
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import { NUMBER } from "../../../constant/number";
+import debounce from 'lodash/debounce';
+
+
 
 const productSchema = Yup.object({
     productName: Yup.string().required('Product Name is required'),
@@ -33,7 +35,7 @@ const Product = () => {
         handleSubmit,
         getValues,
         setValue,
-        formState: { errors, defaultValues }
+        formState: { errors }
       } = useForm({ resolver: yupResolver(productSchema) });
       console.log(errors, 'errorserrors', getValues());
 
@@ -67,6 +69,8 @@ const Product = () => {
 
     // for deleting the row
     const [selectedItemId, setSelectedItemId] = useState(null);
+    const [page, setPage] = useState(1);
+    const [sorted, setSorted] = useState(false);
 
     // for fetch the data
     useEffect(() => {
@@ -160,6 +164,23 @@ const Product = () => {
         productData(data);
     };
 
+    const handleSort = (name) => {
+        setSorted(!sorted);
+        const sortBy = sorted ? 'asc' : 'desc';
+        fetchProduct(null, null, true, page, name, sortBy);
+    };
+
+    function handleSearch(query) {
+        try {
+            fetchProduct(null, query);
+        } catch (error) {
+            console.error('Error fetching search results:', error);
+        }
+    }
+
+    const debouncedHandleSearch = useCallback(debounce(handleSearch, 1000), []);
+
+
     const productData = (formData) => {
         // e.preventDefault();
         console.log("Product information ", formData.productImage, formData.thumbnailImage);
@@ -189,17 +210,15 @@ const Product = () => {
     };
 
     // id = null means all category else selected id category
-    const fetchSubCategories = (id = '') => {
-        const routeName = "/subCategories";
-        fetchData(routeName)
-            .then((result) => {
-                if (id === '') {
-                    setSubCategory(result);
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-            });
+    const fetchSubCategories = async (id = '') => {
+        try{
+            const result = await fetchData("/subCategories?isPaginate=false");
+            if(!id) {
+                setSubCategory(result?.data);
+            }
+        } catch(error){
+            throw error
+        }
     }
 
     const fetchCategories = async () => {
@@ -211,12 +230,16 @@ const Product = () => {
         }
     }
 
-    const fetchProduct = async (id) => {
-        console.log("call edit function ", id);
-        const routeName = id ? `/product/${id}` : '/product';
-        console.log("call routeName ", routeName);
+    const fetchProduct = async (id, searchValue, isPaginate = true, pageData = 1, sort = 'name', sortBy = 'asc') => {
+        let routeName = id ? `/product/${id}` : '/product';
+        if (searchValue && isPaginate) {
+            routeName = routeName + `?filter=${searchValue}&page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else if (isPaginate) {
+            routeName = routeName + `?page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else {
+            routeName = routeName + `?filter=${searchValue}&sort=${sort}&sortBy=${sortBy}`
+        }
         try {
-            console.log("inner fetch banner ");
             const productData = await fetchData(routeName)
             if (id) {
                 setFormData({
@@ -238,7 +261,7 @@ const Product = () => {
                 setIsEdit(true);
                 handleShow();
             } else {
-                setProduct(productData);
+                setProduct(productData?.data);
                 setIsEdit(false);
             }
         } catch (err) {
@@ -250,7 +273,7 @@ const Product = () => {
     // for fetch the data
     useEffect(() => {
         // Call the fetchData function
-        fetchProduct();
+        fetchProduct(null, null);
         fetchSubCategories();
         fetchCategories();
     }, []);
@@ -279,6 +302,7 @@ const Product = () => {
                                             className="form-input search-input"
                                             type="search"
                                             placeholder="Search..."
+                                            onChange={(e) => debouncedHandleSearch(e.target.value)}
                                         />
                                     </InputGroup>
                                 </Form>
@@ -299,7 +323,7 @@ const Product = () => {
                                     <div className="th flex-table-column-25" >
                                         <span className="table-heading">
                                             <span>Name</span>
-                                            <span className="icon-filter-custom">
+                                            <span className="icon-filter-custom" onClick={(e) => handleSort('productName')}>
                                                 <img src={defaultIcon} alt="filter icon" />
                                             </span>
                                         </span>
@@ -307,7 +331,7 @@ const Product = () => {
                                     <div className="th flex-table-column-25" >
                                         <span className="table-heading">
                                             <span>Priority</span>
-                                            <span className="icon-filter-custom">
+                                            <span className="icon-filter-custom" onClick={(e) => handleSort('unit')}>
                                                 <img src={defaultIcon} alt="filter icon" />
                                             </span>
                                         </span>

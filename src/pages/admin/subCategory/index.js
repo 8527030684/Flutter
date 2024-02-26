@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Row, Dropdown, Button, Form, InputGroup, DropdownButton, Col, Modal, } from "react-bootstrap";
 import defaultIcon from '../../../assests/icons/defaultSort.svg';
 import closeIcon from '../../../assests/icons/close.svg';
-import Sidebar from "../../sidebar";
-import AdminHeader from "../adminHeader";
 import { deleteData, fetchData, postData, updateData } from "../../../apis/api";
 import CustomLoader from "../../customLoader/customLoader";
 import CropperImage from "../../common/cropperImage";
@@ -11,6 +9,8 @@ import { NUMBER } from "../../../constant/number";
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import debounce from 'lodash/debounce';
+
 
 const subCategorySchema = Yup.object({
     categoryId: Yup.string().required('Select category'),
@@ -27,7 +27,7 @@ const SubCategory = () => {
         handleSubmit,
         getValues,
         setValue,
-        formState: { errors, defaultValues }
+        formState: { errors }
       } = useForm({ resolver: yupResolver(subCategorySchema) });
       console.log(errors, 'errorserrors', getValues());
 
@@ -52,6 +52,8 @@ const SubCategory = () => {
 
     // for deleting the row
     const [selectedItemId, setSelectedItemId] = useState(null);
+     const [page, setPage] = useState(1);
+    const [sorted, setSorted] = useState(false);
 
     // for fetch the data
     useEffect(() => {
@@ -86,7 +88,6 @@ const SubCategory = () => {
     //for submiting data into database
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        // setImage(inputRef.current.value);
         console.log({[name]: value}, '[name]: value[name]: value');
         setFormData(pre => ({ ...pre, [name]: value }));
     };
@@ -125,10 +126,6 @@ const SubCategory = () => {
     };
 
     const subCategoryPostData = (formData) => {
-        // e.preventDefault();
-        // console.log("subcategory data ", formData.id);
-        // console.log("categoryId ", formData.categoryId);
-        console.log("category formData Status ", formData.status);
         const routeName = !isEdit ? '/subCategories' : `/subCategories/${formData.id}`;
         if (!isEdit) {
             postData(routeName, formData, { accept: 'application/json' })
@@ -156,8 +153,15 @@ const SubCategory = () => {
     };
 
     // id = null means all category else selected id category
-    const fetchSubCategories = async (id) => {
-        const routeName = id ? `/subCategories/${id}` : '/subCategories';
+    const fetchSubCategories = async (id, searchValue, isPaginate = true, pageData = 1, sort = 'name', sortBy = 'asc') => {
+        let routeName = id ? `/subCategories/${id}` : '/subCategories';
+        if (searchValue && isPaginate) {
+            routeName = routeName + `?filter=${searchValue}&page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else if (isPaginate) {
+            routeName = routeName + `?page=${pageData}&limit=${NUMBER.TEN}&sort=${sort}&sortBy=${sortBy}&isPaginate=true`
+        } else {
+            routeName = routeName + `?filter=${searchValue}&sort=${sort}&sortBy=${sortBy}`
+        }
         try {
             const categoryData = await fetchData(routeName)
             if (id) {
@@ -165,7 +169,7 @@ const SubCategory = () => {
                     id: categoryData._id,
                     categoryId: categoryData.categoryId,
                     name: categoryData.name,
-                    priority: categoryData.priority.toString(), // Convert to string if needed
+                    priority: categoryData.priority.toString(),
                     status: categoryData.status,
                     logo: categoryData.logo,
                 });
@@ -173,7 +177,7 @@ const SubCategory = () => {
                 setIsEdit(true)
                 handleShow();
             } else {
-                setSubCategory(categoryData);
+                setSubCategory(categoryData?.data);
                 setIsEdit(false)
             }
         } catch (err) {
@@ -189,20 +193,28 @@ const SubCategory = () => {
             throw err;
         }
     }
+    const handleSort = (name) => {
+        setSorted(!sorted);
+        const sortBy = sorted ? 'asc' : 'desc';
+        fetchSubCategories(null, null, true, page, name, sortBy);
+    };
+
+    function handleSearch(query) {
+        try {
+            fetchSubCategories(null, query);
+        } catch (error) {
+            console.error('Error fetching search results:', error);
+        }
+    }
+
+    const debouncedHandleSearch = useCallback(debounce(handleSearch, 1000), []);
 
     // for fetch the data
     useEffect(() => {
-        // Call the fetchData function
-        fetchSubCategories();
+        fetchSubCategories(null, null);
         fetchCategories();
     }, []);
 
-     // Pass the value from formData to the respective form fields using setValue
-    // useEffect(() => {
-    //     Object.keys(formData).forEach(key => {
-    //         setValue(key, formData[key]);
-    //     });
-    // }, [formData]);
 
     return (
         <>
@@ -220,6 +232,7 @@ const SubCategory = () => {
                                         className="form-input search-input"
                                         type="search"
                                         placeholder="Search..."
+                                        onChange={(e) => debouncedHandleSearch(e.target.value)}
                                     />
                                 </InputGroup>
                             </Form>
@@ -240,7 +253,7 @@ const SubCategory = () => {
                                 <div className="th flex-table-column-20" >
                                     <span className="table-heading">
                                         <span>Category</span>
-                                        <span className="icon-filter-custom">
+                                        <span className="icon-filter-custom" onClick={(e) => handleSort('categoryId')}>
                                             <img src={defaultIcon} alt="filter icon" />
                                         </span>
                                     </span>
@@ -248,7 +261,7 @@ const SubCategory = () => {
                                 <div className="th flex-table-column-20" >
                                     <span className="table-heading">
                                         <span>Name</span>
-                                        <span className="icon-filter-custom">
+                                        <span className="icon-filter-custom" onClick={(e) => handleSort('name')}>
                                             <img src={defaultIcon} alt="filter icon" />
                                         </span>
                                     </span>
@@ -261,7 +274,7 @@ const SubCategory = () => {
                                 <div className="th flex-table-column-20" >
                                     <span className="table-heading">
                                         <span>Priority</span>
-                                        <span className="icon-filter-custom">
+                                        <span className="icon-filter-custom" onClick={(e) => handleSort('priority')}>
                                             <img src={defaultIcon} alt="filter icon" />
                                         </span>
                                     </span>
@@ -351,8 +364,8 @@ const SubCategory = () => {
                                             name="name"
                                             id="name"
                                             autoComplete="off"
-                                            // value={formData.name}
-                                            // onChange={handleInputChange}
+                                            value={formData.name}
+                                            onChange={handleInputChange}
                                             {...register("name")}
                                             className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                                         />
@@ -368,8 +381,8 @@ const SubCategory = () => {
                                             placeholder="Enter priority"
                                             name="priority"
                                             autoComplete="off"
-                                            // value={formData.priority}
-                                            // onChange={handleInputChange}
+                                            value={formData?.priority}
+                                            onChange={handleInputChange}
                                             {...register("priority")}
                                             className={`form-control ${errors.priority ? 'is-invalid' : ''}`}
                                         />
