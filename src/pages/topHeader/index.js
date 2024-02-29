@@ -37,7 +37,7 @@ const TopHeader = () => {
       }
       try {
           const categoryData = await fetchData(routeName)
-          setSearchData(categoryData);
+          setSearchData(categoryData?.data);
       } catch (err) {
           console.error('Error fetching data:', err);
       }

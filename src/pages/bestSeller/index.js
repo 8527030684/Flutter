@@ -1,39 +1,28 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Image, ListGroup, Nav, NavLink, Row } from "react-bootstrap";
+import { Container, Image, Nav } from "react-bootstrap";
 import Slider from 'react-slick';
 import { addItem } from "../../redux/slices/cartSlice";
 import { useDispatch } from "react-redux";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import seller from '../../assests/img/product1.png';
-import seller2 from '../../assests/img/seller2.png';
-import seller3 from '../../assests/img/seller3.png';
 import { fetchData } from "../../apis/api";
 import { Link } from "react-router-dom";
 
 
 const Bestsellers = () => {
-
-  // const [data, setData] = useState(null);
   const [productInfo, setProductInfo] = useState(null);
 
+  const fetchProduct= async () => {
+    const product = await fetchData('/product');
+    setProductInfo(product?.data);
+  }
+
   useEffect(() => {
-    // Call the fetchData function
-    fetchData('/product')
-      .then((result) => {
-        setProductInfo(result);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
+    fetchProduct();
     }, []);
 
-  // const {category} = data;
-  // console.log("category ", category);
 
   const dispatch = useDispatch();
-  const [price, setPrice] = useState(100);
-  const [name, setName] = useState(100);
 
   const settings2 = {
     dots: false,
@@ -70,16 +59,6 @@ const Bestsellers = () => {
   };
 
     return (
-        <>
-
-        {/* for testing api's working or not ? */}
-        {/* {data?.map((item)=> (
-            <div key={item?._id}>
-                {item.category}
-            </div>
-        ))} */}
-        {/* for testing api's working or not ? */}
-
           <Container className="best-slider">
             <div className="header-title">
                 <h1>Bestsellers</h1>
@@ -99,14 +78,13 @@ const Bestsellers = () => {
                     <span className="offer-price">{item.totalPrice}</span>
                   </div>
                 </div>
-                <Nav.Link className="add-to-cart" onClick={(e) =>dispatch(addItem({ name: name, price}))}>Add to cart</Nav.Link>
+                <Nav.Link className="add-to-cart" onClick={(e) =>dispatch(addItem())}>Add to cart</Nav.Link>
               </Link>
                 ))
               }
             </Slider>
 
           </Container>
-        </>
     )
 }
 

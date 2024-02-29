@@ -70,7 +70,7 @@ const Home = () => {
     // Call the fetchData function
     fetchData('/banners')
       .then((result) => {
-        setHomeBanners(result);
+        setHomeBanners(result?.data);
       })
       .catch((error) => {
         console.error('Error while fetching banners:', error);
